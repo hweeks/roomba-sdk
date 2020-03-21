@@ -14,7 +14,7 @@
   "scripts": {
     "prepublishOnly": "yarn build",
     "lint": "eslint lib/ --ext .js,.jsx,.ts,.tsx",
-    "test": "mocha -r ts-node/register",
+    "test": "yarn run lint && mocha -r ts-node/register",
     "test:coverage:run": "istanbul cover _mocha -- $npm_package_config_mocha",
     "test:coverage:check": "istanbul check-coverage --functions 80",
     "test:coverage": "npm run test:coverage:run && npm run test:coverage:check",
