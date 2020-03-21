@@ -2,13 +2,19 @@
   "name": "roomba-sdk",
   "version": "1.0.0",
   "description": "Unofficial iRobot Roomba 980 and wifi other enabled series library sdk - fork of dorita980",
-  "main": "./index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "directories": {
-    "test": "test"
+    "test": "test",
+    "lib": "lib"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "check:style": "eslint .",
-    "test": "mocha -r ts-node/register",
+    "prepublishOnly": "yarn build",
+    "lint": "eslint lib/ --ext .js,.jsx,.ts,.tsx",
+    "test": "yarn run lint && mocha -r ts-node/register",
     "test:coverage:run": "istanbul cover _mocha -- $npm_package_config_mocha",
     "test:coverage:check": "istanbul check-coverage --functions 80",
     "test:coverage": "npm run test:coverage:run && npm run test:coverage:check",
@@ -16,7 +22,7 @@
     "build": "rm -rf ./dist && tsc"
   },
   "bin": {
-    "rsdk-cli": "./bin/getpassword.js"
+    "rsdk-cli": "./dist/bin/getpassword.js"
   },
   "repository": {
     "type": "git",
@@ -25,9 +31,11 @@
   "devDependencies": {
     "@types/node": "^12.12.30",
     "@types/request-promise": "^4.1.46",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
-    "eslint": "^4.18.2",
+    "eslint": "^6.8.0",
     "eslint-config-semistandard": "^7.0.0",
     "eslint-config-standard": "^6.2.0",
     "eslint-plugin-promise": "^3.0.0",

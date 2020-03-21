@@ -2,9 +2,9 @@
 
 'use strict';
 
-const request = require('request');
-const tls = require('tls');
-const discovery = require('../lib/discovery');
+import request, { UriOptions, CoreOptions } from 'request'
+import tls from 'tls'
+import * as discovery from '../discovery'
 
 if (!process.argv[2]) {
   console.log('Usage: npm run getpassword <robot_ip_address> [firmware version]');
@@ -14,7 +14,7 @@ if (!process.argv[2]) {
 const host = process.argv[2];
 const fversion = process.argv[3];
 
-var requestOptions = {
+const requestOptions: CoreOptions & UriOptions = {
   'method': 'POST',
   'uri': 'https://' + host + ':443/umi',
   'strictSSL': false,
@@ -29,38 +29,11 @@ var requestOptions = {
   }
 };
 
-function checkV1 (rid) {
-  if (rid === 120) {
-    console.log('Timeout getting password. Are you following the instructions? You already setup your robot? Its the robot IP correct?');
-    process.exit(1);
-  }
-
-  requestOptions.body = '{"do":"get","args":["passwd"],"id":' + rid + '}';
-
-  request(requestOptions, function (error, response, body) {
-    if (error) {
-      console.log('Fatal error connecting to robot. Please verify the IP address and connectivity:', error);
-      process.exit(1);
-    }
-
-    if (response.statusCode === 401) {
-      setTimeout(function () { checkV1(++rid); }, 2000);
-    } else if (response.statusCode === 200) {
-      console.log('========>');
-      let pass = JSON.parse(body).ok.passwd;
-      console.log('Good job!');
-      console.log('Password: ' + pass);
-      getBlid(++rid, pass);
-    } else {
-      console.log('Unespected response. Checking again...');
-      setTimeout(function () { checkV1(++rid); }, 2000);
-    }
-  });
-}
-
-function getBlid (rid, pass) {
+function getBlid (rid: number, pass: string) {
   requestOptions.body = '{"do":"get","args":["sys"],"id":' + rid + '}';
-  requestOptions.headers['Authorization'] = 'Basic ' + new Buffer('user:' + pass).toString('base64');
+  if (requestOptions.headers) {
+    requestOptions.headers['Authorization'] = 'Basic ' + new Buffer('user:' + pass).toString('base64');
+  }
 
   request(requestOptions, function (error, response, body) {
     if (error) {
@@ -69,7 +42,7 @@ function getBlid (rid, pass) {
     }
 
     if (response.statusCode === 200) {
-      const blid = JSON.parse(body).ok.blid.map(function (dec) {
+      const blid = JSON.parse(body).ok.blid.map(function (dec: number) {
         return (dec + 0x10000).toString(16).substr(-2).toUpperCase();
       }).join('');
 
@@ -81,14 +54,43 @@ function getBlid (rid, pass) {
   });
 }
 
+function checkV1 (rid: number) {
+  if (rid === 120) {
+    console.log('Timeout getting password. Are you following the instructions? You already setup your robot? Its the robot IP correct?');
+    process.exit(1);
+  }
+
+  requestOptions.body = '{"do":"get","args":["passwd"],"id":' + rid + '}';
+
+  request(requestOptions, function (error: Error, response: request.Response, body: any) {
+    if (error) {
+      console.log('Fatal error connecting to robot. Please verify the IP address and connectivity:', error);
+      process.exit(1);
+    }
+
+    if (response.statusCode === 401) {
+      setTimeout(function () { checkV1(++rid); }, 2000);
+    } else if (response.statusCode === 200) {
+      console.log('========>');
+      const pass = JSON.parse(body).ok.passwd;
+      console.log('Good job!');
+      console.log('Password: ' + pass);
+      getBlid(++rid, pass);
+    } else {
+      console.log('Unespected response. Checking again...');
+      setTimeout(function () { checkV1(++rid); }, 2000);
+    }
+  });
+}
+
 function checkV2 () {
-  var sliceFrom = 13;
+  let sliceFrom = 13;
   discovery.getRobotPublicInfo(host, function (e, robotData) {
     console.log('Robot Data:');
     console.log(robotData);
   });
   const packet = 'f005efcc3b2900';
-  var client = tls.connect(8883, host, {rejectUnauthorized: false, ciphers: process.env.ROBOT_CIPHERS || 'AES128-SHA256'}, function () {
+  const client = tls.connect(8883, host, {rejectUnauthorized: false, ciphers: process.env.ROBOT_CIPHERS || 'AES128-SHA256'}, function () {
     client.write(new Buffer(packet, 'hex'));
   });
 

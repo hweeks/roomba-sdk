@@ -2,7 +2,7 @@ import dgram from 'dgram';
 
 type InitCallBack = (error: Error | null, message?: string) => void
 
-export function discovery (cb : InitCallBack, full: boolean) {
+export function discovery (cb: InitCallBack, full: boolean): void {
   const server = dgram.createSocket('udp4');
 
   server.on('error', (err) => {
@@ -12,14 +12,16 @@ export function discovery (cb : InitCallBack, full: boolean) {
 
   server.on('message', (msg) => {
     try {
-      let parsedMsg = JSON.parse(msg.toString());
+      const parsedMsg = JSON.parse(msg.toString());
       if (parsedMsg.hostname && parsedMsg.ip && ((parsedMsg.hostname.split('-')[0] === 'Roomba') || (parsedMsg.hostname.split('-')[0] === 'iRobot'))) {
         server.close();
         console.log('Robot found! with blid/username: ' + parsedMsg.hostname.split('-')[1]);
         console.log(parsedMsg);
         cb(null, full ? parsedMsg : parsedMsg.ip);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.log('Error in server message: ', e.message)
+    }
   });
 
   server.on('listening', () => {
@@ -33,7 +35,7 @@ export function discovery (cb : InitCallBack, full: boolean) {
   });
 }
 
-export function getRobotPublicInfo (ip: string, cb: InitCallBack) {
+export function getRobotPublicInfo (ip: string, cb: InitCallBack): void {
   const server = dgram.createSocket('udp4');
 
   server.on('error', (err) => {
@@ -43,13 +45,15 @@ export function getRobotPublicInfo (ip: string, cb: InitCallBack) {
 
   server.on('message', (msg) => {
     try {
-      let parsedMsg = JSON.parse(msg.toString());
+      const parsedMsg = JSON.parse(msg.toString());
       if (parsedMsg.hostname && parsedMsg.ip && ((parsedMsg.hostname.split('-')[0] === 'Roomba') || (parsedMsg.hostname.split('-')[0] === 'iRobot'))) {
         server.close();
         parsedMsg.blid = parsedMsg.hostname.split('-')[1];
         cb(null, parsedMsg);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.log('Error in server message: ', e.message)
+    }
   });
 
   server.bind(5678, function () {

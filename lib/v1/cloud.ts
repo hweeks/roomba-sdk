@@ -4,7 +4,7 @@ export default function (user: string, password: string) {
   if (!user) throw new Error('robotID is required.');
   if (!password) throw new Error('password is required.');
 
-  var requestOptions : request.OptionsWithUri = {
+  const requestOptions: request.OptionsWithUri = {
     'method': 'GET',
     headers: {
       'User-Agent': 'aspen%20production/2618 CFNetwork/758.3.15 Darwin/15.4.0',
@@ -56,4 +56,4 @@ export default function (user: string, password: string) {
     off: () => apiCall('multipleFieldSet', 'off'),
     fbeep: () => apiCall('multipleFieldSet', 'fbeep')
   };
-};
+}
