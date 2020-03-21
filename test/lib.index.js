@@ -3,7 +3,7 @@
 
 const chai = require('chai');
 const expect = chai.expect;
-const iRobotSDK = require('../index');
+const iRobotSDK = require('../lib/index');
 
 describe('iRobotSDK require', () => {
   it('should return an object with functions', () => {
