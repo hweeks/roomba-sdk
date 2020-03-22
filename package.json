@@ -22,7 +22,7 @@
     "build": "rm -rf ./dist && tsc"
   },
   "bin": {
-    "rsdk-cli": "./dist/bin/getpassword.js"
+    "roomba-sdk-creds": "./dist/bin/getpassword.js"
   },
   "repository": {
     "type": "git",

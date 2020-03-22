@@ -7,12 +7,12 @@ import localV2 from './v2/local'
 
 import * as discoveryRoot from './discovery'
 
-export function cloud (username: string, password: string, version: number) {
+export function cloud (username: string, password: string, version?: number) {
   if (version === 1) return cloudV1(username, password);
   return cloudV2(username, password);
 }
 
-export function local (username: string, password: string, ip: string, version: number, interval: number) {
+export function local (username: string, password: string, ip: string, version?: number, interval?: number) {
   if (version === 1) return localV1(username, password, ip);
   return localV2(username, password, ip, interval);
 }

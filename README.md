@@ -13,16 +13,6 @@ With this library you can send commands to your wifi enabled Roomba through the 
 
 See [rest980](https://github.com/koalazak/rest980) if you need a HTTP REST API interface.
 
-# Advice
-
-If you enjoy dorita980 and it works nice for you, I recommend blocking the internet access to your robot to avoid the OTA firmware updates. New firmware changes can cause dorita980 to stop working. Blocking firmware updates can be performed using the parental control options on your router.
-
-When a new firmware is published, you can come here to verify if dorita980 is still compatible. Once dorita980 is compatible you can temporarily enable internet access for your robot to get the firmware upgrade.
-
-If you have firmware version 1.6.x [click here](https://github.com/koalazak/dorita980/blob/master/READMEv1.6.6.md) to see the old documentation.
-
-[Check your robot version!](http://homesupport.irobot.com/app/answers/detail/a_id/529)
-
 # Features
 
 - Compatible robots: all 600, 800, 900, e5 and i7/i7+ series with HOME app and Braava m6.
@@ -35,11 +25,9 @@ If you have firmware version 1.6.x [click here](https://github.com/koalazak/dori
 - Firmware 3.2.x compatible (latest serie 800 uses firmware v3).
 - See [rest980](https://github.com/koalazak/rest980) if you need a HTTP REST API interface to use dorita980 through it.
 
-[![iRobot Roomba 980 cleaning map using dorita980 lib](https://img.youtube.com/vi/XILvHFEX7TM/0.jpg)](https://www.youtube.com/watch?v=XILvHFEX7TM)
-
-Video: Realtime cleaning map using dorita980 lib in [rest980](https://github.com/koalazak/rest980).
-
 ## Supported Features by Firmware Version
+
+> will deprecate v1 in version 2
 
 |                                             | 1.6.x Local | 1.6.x Cloud   |  2.x.x Local  |2.x.x Cloud | 3.x.x Local |
 |---------------------------------------------|-------------|---------------|---------------|---------|--------|
@@ -68,7 +56,7 @@ Video: Realtime cleaning map using dorita980 lib in [rest980](https://github.com
 First you need node.js installed and then:
 
 ```bash
-$ npm install dorita980 --save
+$ npm install roomba-sdk --save
 ```
 
 # Quick start via Local request on your LAN
@@ -77,62 +65,21 @@ You can control the robot from your local network.
 Create `myapp.js` file with this content:
 
 ```javascript
-var dorita980 = require('dorita980');
+import { Local } from 'roomba-sdk'
 
-var myRobotViaLocal = new dorita980.Local('MyUsernameBlid', 'MyPassword', '192.168.1.104'); // robot IP address
+const password = 'some random string'
+const user = 'some really long id'
+const ip = '10.0.0.x'
 
-myRobotViaLocal.on('connect', init);
+const localRoomba = Local(user, password, ip)
 
-function init () {
-  myRobotViaLocal.clean()
-  .then(() => myRobotViaLocal.end()) // disconnect to leave free the channel for the mobile app.
-  .catch(console.log);
+async function init () {
+  await localRoomba.clean()
+  await localRoomba.stop()
+  await localRoomba.end()
 }
 
-```
-
-Then install `dorita980` using `npm` and run your program:
-
-```bash
-$ npm install dorita980 --save
-$ node myapp.js
-```
-
-# Examples
-
-Pause the robot via Local request:
-
-```javascript
-var dorita980 = require('dorita980');
-
-var myRobotViaLocal = new dorita980.Local('MyUsernameBlid', 'MyPassword', '192.168.1.104'); // robot IP address
-
-myRobotViaLocal.on('connect', init);
-
-function init () {
-  myRobotViaLocal.pause()
-  .then(() => myRobotViaLocal.end()) // disconnect to leave free the channel for the mobile app.
-  .catch(console.log);
-}
-```
-
-Get robot week schedule
-
-```javascript
-var dorita980 = require('dorita980');
-
-var myRobotViaLocal = new dorita980.Local('MyUsernameBlid', 'MyPassword', '192.168.1.104'); // robot IP address
-
-myRobotViaLocal.on('connect', init);
-
-function init () {
-  myRobotViaLocal.getWeek()
-  .then((weekConfig) => {
-    console.log(weekConfig)
-    myRobotViaLocal.end()
-  })
-  .catch(console.log);
-}
+localRoomba.on('connect', init)
 ```
 
 # How to get your username/blid and password
@@ -141,50 +88,12 @@ function init () {
 
 You need to know your robot IP address (look in your router or scan your LAN network with nmap to find it). Or use the `dorita980.getRobotIP()` method.
 
-Install `dorita980` globally and then run the `get-roomba-password` command:
+Install `roomba-sdk` in your package and use npx or yarn to:
 
 ```bash
-$ npm install -g dorita980
-$ get-roomba-password <robotIP>
-```
-
-or clone the repo and then run the npm script:
-
-```bash
-$ git clone https://github.com/koalazak/dorita980.git
-$ cd dorita980
-$ npm install
-$ npm run getpassword <robotIP>
-```
-
-or docker run command:
-
-```
-docker run -it node sh -c "npm install -g dorita980 && get-roomba-password <robotIP>"
-```
-
-Example Output:
-
-```
-$ npm install -g dorita980
-$ get-roomba-password 192.168.1.103
-
-Make sure your robot is on the Home Base and powered on. Then press and hold the HOME button on your robot until it plays a series of tones (about 2 seconds). Release the button and your robot will flash WIFI light.
-Then press any key...
-{ ver: '2',
-  hostname: 'Roomba-xxxxxxxxxxxxx',
-  robotname: 'Dorita',
-  ip: '192.168.1.103',
-  mac: '12:12:12:12:12:12',
-  sw: 'v2.0.0-34',
-  sku: 'R98----',
-  nc: 0,
-  proto: 'mqtt',
-  blid: 'xxxxxxxxxxxxx' <---- username/blid
-}
-Password=> :1:1486937829:gktkDoYpWaDxCfGh <= Yes, all this string.
-Use this credentials in dorita980 lib :)
-
+$ npx roomba-sdk-creds <ip-of-robot>
+# or yarn...
+$ yarn roomba-sdk-creds <ip-of-robot>
 ```
 
 # Auto discover IP address for local request:
@@ -773,7 +682,7 @@ Emitted every `emitIntervalTime` milliseconds with the mission data. (util for m
 
 ```javascript
 var cleanMissionStatus = 300; // default is 800ms
-var myRobotViaLocal = new dorita980.Local('MyUsernameBlid', 'MyPassword', '192.168.1.104', 2, cleanMissionStatus); // Note Firmware version.
+var myRobotViaLocal = new roombaSdk.Local('MyUsernameBlid', 'MyPassword', '192.168.1.104', 2, cleanMissionStatus); // Note Firmware version.
 
 myRobotViaLocal.on('mission', function (data) {
   console.log(data);
@@ -816,14 +725,6 @@ Will print the Full robot state!
 
 Not implemented yet in Firmware 2.0.0. [Help wanted!](https://github.com/koalazak/dorita980/issues/25)
 
-## Note for node.js v0.10 users
-
-dorita980 is compatible with node.js > 4.0 But you can use the [getpassword](https://github.com/koalazak/dorita980#how-to-get-your-usernameblid-and-password) feature in node.js < 4.0 using `--harmony` flag like that:
-
-```bash
-$ node --harmony ./bin/getpassword.js "192.168.1.104"
-```
-
 ## Custom tls cipher
 
 You can set `ROBOT_CIPHERS` environment variable to overwrite the cipher suit used in tls connection to the robot. Default is `AES128-SHA256`
@@ -832,6 +733,7 @@ You can set `ROBOT_CIPHERS` environment variable to overwrite the cipher suit us
 $ ROBOT_CIPHERS=AES128-SHA node myscript.js
 ```
 
-## Author
+## Authors
 
 - [Facu ZAK](https://github.com/koalazak)
+- [hweeks(https://github.com/hweeks)

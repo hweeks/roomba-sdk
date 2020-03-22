@@ -56,7 +56,7 @@ export interface LocalV2Return extends mqtt.MqttClient {
   setAlwaysFinishOff: () => Promise<{ok: null}>;
 }
 
-export default function localV2 (user: string, password: string, host: string, emitIntervalTime: number): LocalV2Return {
+export default function localV2 (user: string, password: string, host: string, emitIntervalTime?: number): LocalV2Return {
   if (!user) throw new Error('robotID is required.');
   if (!password) throw new Error('password is required.');
   if (!host) throw new Error('host is required.');
@@ -101,7 +101,7 @@ export default function localV2 (user: string, password: string, host: string, e
       if (robotState.cleanMissionStatus) {
         client.emit('mission', filterProps(['cleanMissionStatus', 'pose', 'bin']));
       }
-    }, emitIntervalTime);
+    }, emitIntervalTime as number);
   });
 
   client.on('close', function () {
@@ -131,7 +131,7 @@ export default function localV2 (user: string, password: string, host: string, e
     return new Promise((resolve, reject) => {
       let cmd: ApiCommandV2 = {command: command, time: Date.now() / 1000 | 0, initiator: 'localApp'};
       if (topic === 'delta') {
-        cmd = {'state': command};
+        cmd = {'state': command };
       }
       if (additionalArgs) {
         cmd = Object.assign(cmd, additionalArgs);
